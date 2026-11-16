@@ -7,7 +7,7 @@ targets:
     platform: iOS
     deploymentTarget: "15.0"
     sources:
-      - TVRemoteApp.swift
+      - .
     info:
       path: Info.plist
       properties:
