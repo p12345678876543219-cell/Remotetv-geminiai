@@ -19,19 +19,16 @@ struct MainTabView: View {
 
     var body: some View {
         TabView {
-            // TAB 1: ĐIỀU KHIỂN
             RemoteControlView(remoteManager: remoteManager)
                 .tabItem {
                     Label("Điều khiển", systemImage: "gamecontroller.fill")
                 }
 
-            // TAB 2: DANH SÁCH THIẾT BỊ & ĐỔI TÊN
             DeviceListView(remoteManager: remoteManager)
                 .tabItem {
                     Label("Thiết bị", systemImage: "tv.fill")
                 }
 
-            // TAB 3: TRUYỀN ẢNH LÊN TV
             CastImageView(remoteManager: remoteManager)
                 .tabItem {
                     Label("Truyền ảnh", systemImage: "photo.fill.on.rectangle.fill")
@@ -41,7 +38,7 @@ struct MainTabView: View {
     }
 }
 
-// MARK: - Tab 1: Giao diện Điều khiển
+// MARK: - Tab 1: Giao diện Điều khiển (Có thêm nút Tắt nguồn)
 struct RemoteControlView: View {
     @ObservedObject var remoteManager: TVRemoteManager
 
@@ -49,32 +46,51 @@ struct RemoteControlView: View {
         ZStack {
             Color.black.ignoresSafeArea()
             
-            VStack(spacing: 24) {
-                // Header trạng thái
-                VStack(spacing: 6) {
-                    Text("SMART TV REMOTE")
-                        .font(.system(size: 15, weight: .black, design: .monospaced))
-                        .foregroundColor(.cyan)
-                    
-                    HStack(spacing: 8) {
-                        Circle()
-                            .fill(remoteManager.isConnected ? Color.green : Color.orange)
-                            .frame(width: 8, height: 8)
-                        Text(remoteManager.statusMessage)
-                            .font(.system(size: 12, design: .monospaced))
-                            .foregroundColor(.gray)
-                            .lineLimit(1)
+            VStack(spacing: 22) {
+                // Header trạng thái & Nút Tắt nguồn nhanh góc trên
+                HStack {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("SMART TV REMOTE")
+                            .font(.system(size: 14, weight: .black, design: .monospaced))
+                            .foregroundColor(.cyan)
+                        
+                        HStack(spacing: 6) {
+                            Circle()
+                                .fill(remoteManager.isConnected ? Color.green : Color.orange)
+                                .frame(width: 8, height: 8)
+                            Text(remoteManager.statusMessage)
+                                .font(.system(size: 11, design: .monospaced))
+                                .foregroundColor(.gray)
+                                .lineLimit(1)
+                        }
                     }
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 5)
-                    .background(Color(white: 0.1))
-                    .clipShape(Capsule())
+                    
+                    Spacer()
+                    
+                    // NÚT TẮT NGUỒN TV
+                    Button(action: {
+                        triggerHaptic(.heavy)
+                        remoteManager.sendKey(.power)
+                    }) {
+                        HStack(spacing: 4) {
+                            Image(systemName: "power")
+                            Text("Nguồn")
+                        }
+                        .font(.system(size: 12, weight: .bold, design: .monospaced))
+                        .foregroundColor(.red)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 8)
+                        .background(Color(white: 0.15))
+                        .clipShape(Capsule())
+                        .overlay(Capsule().stroke(Color.red.opacity(0.5), lineWidth: 1))
+                    }
                 }
+                .padding(.horizontal)
                 .padding(.top, 10)
                 
                 Spacer()
 
-                // Cụm phím D-Pad
+                // Cụm phím D-Pad điều hướng
                 ZStack {
                     Circle()
                         .fill(Color(white: 0.12))
@@ -150,7 +166,7 @@ struct RemoteButton: View {
     }
 }
 
-// MARK: - Tab 2: Danh sách thiết bị & Đổi tên
+// MARK: - Tab 2: Danh sách thiết bị & Nút kết nối / Đổi tên
 struct DeviceModel: Identifiable, Hashable {
     let id = UUID()
     let originalName: String
@@ -192,7 +208,7 @@ struct DeviceListView: View {
                             .listRowBackground(Color(white: 0.08))
                         } else {
                             ForEach(remoteManager.devices, id: \.endpoint) { deviceModel in
-                                HStack {
+                                HStack(spacing: 12) {
                                     VStack(alignment: .leading, spacing: 4) {
                                         Text(deviceModel.customName)
                                             .font(.system(size: 15, weight: .bold, design: .monospaced))
@@ -204,12 +220,12 @@ struct DeviceListView: View {
                                     
                                     Spacer()
                                     
-                                    // Nút kết nối nhanh
+                                    // NÚT KẾT NỐI NGAY BÊN CẠNH THIẾT BỊ
                                     Button(action: {
                                         remoteManager.connectToDevice(deviceModel)
                                     }) {
-                                        Text(remoteManager.currentConnectedEndpoint == deviceModel.endpoint ? "Đang kết nối" : "Chọn")
-                                            .font(.system(size: 12, weight: .bold, design: .monospaced))
+                                        Text(remoteManager.currentConnectedEndpoint == deviceModel.endpoint ? "Đã kết nối" : "Kết nối")
+                                            .font(.system(size: 11, weight: .bold, design: .monospaced))
                                             .padding(.horizontal, 10)
                                             .padding(.vertical, 6)
                                             .background(remoteManager.currentConnectedEndpoint == deviceModel.endpoint ? Color.green : Color.cyan)
@@ -218,7 +234,7 @@ struct DeviceListView: View {
                                     }
                                     .buttonStyle(BorderlessButtonStyle())
 
-                                    // Nút mở hộp thoại đổi tên
+                                    // NÚT ĐỔI TÊN THIẾT BỊ
                                     Button(action: {
                                         editingDevice = deviceModel
                                         newNameText = deviceModel.customName
@@ -286,7 +302,6 @@ struct CastImageView: View {
                     .foregroundColor(.cyan)
                     .padding(.top, 10)
 
-                // Khung hiển thị ảnh xem trước
                 ZStack {
                     RoundedRectangle(cornerRadius: 16)
                         .fill(Color(white: 0.1))
@@ -315,7 +330,6 @@ struct CastImageView: View {
                 }
                 .padding(.horizontal)
 
-                // Nút chọn ảnh từ thư viện
                 PhotosPicker(selection: $selectedItem, matching: .images) {
                     HStack {
                         Image(systemName: "photo.on.rectangle")
@@ -339,7 +353,6 @@ struct CastImageView: View {
                     }
                 }
 
-                // Nút gửi ảnh lên TV
                 Button(action: {
                     guard let image = selectedImage else { return }
                     isSending = true
@@ -400,6 +413,7 @@ class TVRemoteManager: ObservableObject {
         case right = "KEY_RIGHT"
         case ok = "KEY_ENTER"
         case back = "KEY_RETURN"
+        case power = "KEY_POWER"
     }
 
     init() {
@@ -448,7 +462,6 @@ class TVRemoteManager: ObservableObject {
                     }
                     self.devices = newDeviceList
 
-                    // Tự động kết nối TV gần nhất (đầu tiên) nếu chưa kết nối
                     if !self.isConnected, let first = newDeviceList.first {
                         self.connectToDevice(first)
                     }
@@ -506,7 +519,6 @@ class TVRemoteManager: ObservableObject {
             return
         }
 
-        // Đóng gói dữ liệu ảnh gửi qua luồng TCP kết nối hiện tại
         connection.send(content: imageData, completion: .contentProcessed { error in
             completion(error == nil)
         })
