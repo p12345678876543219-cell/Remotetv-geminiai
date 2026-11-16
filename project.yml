@@ -1,0 +1,26 @@
+name: TVRemoteApp
+options:
+  bundleIdPrefix: com.phuc
+targets:
+  TVRemoteApp:
+    type: application
+    platform: iOS
+    deploymentTarget: "15.0"
+    sources:
+      - TVRemoteApp.swift
+    info:
+      path: Info.plist
+      properties:
+        UILaunchScreen: {}
+        NSLocalNetworkUsageDescription: "Ứng dụng cần quyền truy cập mạng nội bộ để tự động tìm và điều khiển TV gần nhất."
+        NSBonjourServices:
+          - _airplay._tcp
+          - _googlecast._tcp
+          - _samsungmsf._tcp
+          - _androidtvremote2._tcp
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.phuc.tvremote
+        CODE_SIGN_IDENTITY: ""
+        CODE_SIGNING_REQUIRED: "NO"
+        CODE_SIGNING_ALLOWED: "NO"
