@@ -1,0 +1,20 @@
+name: Build Unsigned IPA
+on: [push]
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build App
+        run: |
+          xcodebuild -project TVRemote.xcodeproj -scheme TVRemote -configuration Release -sdk iphoneos build CODE_SIGNING_ALLOWED=NO CONFIGURATION_BUILD_DIR=./build
+      - name: Package IPA
+        run: |
+          mkdir -p Payload
+          cp -r ./build/TVRemote.app Payload/
+          zip -r TVRemote.ipa Payload
+      - name: Upload IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: TVRemote-IPA
+          path: TVRemote.ipa
