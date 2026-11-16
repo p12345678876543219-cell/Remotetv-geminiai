@@ -1,4 +1,4 @@
-name: Build iOS IPA for ESign
+name: Build iOS IPA
 
 on:
   push:
@@ -7,15 +7,11 @@ on:
 
 jobs:
   build:
-    name: Build Unsigned IPA
     runs-on: macos-latest
 
     steps:
-      - name: Checkout Repository
+      - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Check Xcode Version
-        run: xcodebuild -version
 
       - name: Install XcodeGen
         run: brew install xcodegen
@@ -23,7 +19,7 @@ jobs:
       - name: Generate Xcode Project
         run: xcodegen generate
 
-      - name: Build App
+      - name: Build App (Unsigned)
         run: |
           xcodebuild -project TVRemoteApp.xcodeproj \
                      -scheme TVRemoteApp \
@@ -35,7 +31,7 @@ jobs:
                      CODE_SIGNING_ALLOWED=NO \
                      build
 
-      - name: Package Unsigned IPA
+      - name: Package IPA
         run: |
           mkdir -p Payload
           cp -r build/Build/Products/Release-iphoneos/TVRemoteApp.app Payload/
