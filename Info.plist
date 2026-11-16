@@ -1,0 +1,8 @@
+<key>NSLocalNetworkUsageDescription</key>
+<string>Ứng dụng cần quyền truy cập mạng cục bộ để tự động tìm và điều khiển TV gần nhất.</string>
+<key>NSBonjourServices</key>
+<array>
+    <string>_googlecast._tcp</string>
+    <string>_airplay._tcp</string>
+    <string>_androidtvremote2._tcp</string>
+</array>
